@@ -3,19 +3,64 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 246, 248, 250;
+  --background-end-rgb: 241, 243, 245;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 18, 24, 36;
+    --background-end-rgb: 12, 16, 24;
   }
 }
 
 body {
-  color: var(--foreground);
+  color: rgb(var(--foreground-rgb));
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition-duration: 0.2s;
+}
+
+/* Message bubble hover effect */
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  transition: all 0.3s ease;
+}
+
+.bg-gradient-to-r:hover {
+  background-position: right center;
 }
