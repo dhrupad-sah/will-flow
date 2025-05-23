@@ -205,6 +205,18 @@ export const updateThreadTitle = async (sessionId: string, title: string) => {
   return response.json() as Promise<ChatSession>;
 };
 
+export const deleteThread = async (sessionId: string) => {
+  const response = await fetch(`${API_URL}/api/v1/chat/session/${sessionId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete thread');
+  }
+
+  return response.json();
+};
+
 // OpenRouter Models
 export const AVAILABLE_MODELS = [
   { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },

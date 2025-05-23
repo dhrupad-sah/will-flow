@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Flow, Message, ThreadInfo, getChatSession, getFlowById, listFlows, listUserThreads, sendChatMessage, updateThreadTitle } from "@/lib/api";
+import { Flow, Message, ThreadInfo, deleteThread, getChatSession, getFlowById, listFlows, listUserThreads, sendChatMessage, updateThreadTitle } from "@/lib/api";
 import { getUserEmail, isAuthenticated } from "@/lib/auth";
 
 export default function ChatPage() {
@@ -170,6 +170,45 @@ export default function ChatPage() {
     }
   };
 
+  // Handle delete thread
+  const handleDeleteThread = async (threadId: string, event: React.MouseEvent) => {
+    // Stop propagation to prevent thread selection
+    event.stopPropagation();
+    
+    // Confirm deletion
+    if (!confirm("Are you sure you want to delete this thread? This action cannot be undone.")) {
+      return;
+    }
+    
+    try {
+      await deleteThread(threadId);
+      
+      // If we're deleting the currently selected thread
+      if (selectedThread === threadId) {
+        setSelectedThread(null);
+        setMessages([]);
+        setThreadTitle("");
+        
+        // Update URL
+        if (selectedFlow) {
+          router.push(`/chat?flow=${selectedFlow.id}`);
+        }
+      }
+      
+      // Refresh thread list
+      if (selectedFlow) {
+        const userEmail = getUserEmail();
+        if (userEmail) {
+          const threadsData = await listUserThreads(userEmail, selectedFlow.id);
+          setThreads(threadsData);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to delete thread');
+    }
+  };
+
   // Handle message submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -321,16 +360,29 @@ export default function ChatPage() {
               {threads.map(thread => (
                 <div 
                   key={thread.id} 
-                  className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 relative"
                   onClick={() => handleThreadSelect(thread.id)}
                 >
-                  <h3 className="font-medium text-gray-900 dark:text-white">
-                    {thread.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {thread.message_count} {thread.message_count === 1 ? 'message' : 'messages'} · 
-                    {' '}{new Date(thread.updated_at).toLocaleDateString()}
-                  </p>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        {thread.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {thread.message_count} {thread.message_count === 1 ? 'message' : 'messages'} · 
+                        {' '}{new Date(thread.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => handleDeleteThread(thread.id, e)}
+                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
+                      aria-label="Delete thread"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

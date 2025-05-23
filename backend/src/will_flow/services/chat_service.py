@@ -143,6 +143,25 @@ class ChatService:
             print(f"Error listing user threads: {e}")
             return []
     
+    async def delete_thread(self, thread_id: str) -> bool:
+        """Delete a chat thread by ID"""
+        try:
+            # Verify thread exists
+            session = await self.get_session(thread_id)
+            if not session:
+                return False
+                
+            # Delete the thread
+            self.client.delete(
+                index=self.index,
+                id=thread_id,
+                refresh=True
+            )
+            return True
+        except Exception as e:
+            print(f"Error deleting thread: {e}")
+            return False
+    
     async def add_message(self, session_id: str, message: Message) -> Optional[ChatSession]:
         try:
             # Get existing session

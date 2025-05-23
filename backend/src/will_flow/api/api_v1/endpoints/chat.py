@@ -56,4 +56,18 @@ async def update_thread_title(session_id: str, title: str):
             raise HTTPException(status_code=404, detail="Chat session not found")
         return session
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error updating thread title: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error updating thread title: {str(e)}")
+
+
+@router.delete("/session/{session_id}")
+async def delete_thread(session_id: str):
+    """
+    Delete a chat thread by ID.
+    """
+    try:
+        success = await chat_service.delete_thread(session_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Chat thread not found")
+        return {"success": True, "message": "Thread deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting thread: {str(e)}") 
