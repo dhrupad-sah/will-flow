@@ -36,9 +36,19 @@ export interface ChatSession {
   id: string;
   flow_id: string;
   user_email: string;
+  title: string;
   messages: Message[];
   created_at: string;
   updated_at: string;
+}
+
+export interface ThreadInfo {
+  id: string;
+  title: string;
+  flow_id: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
 }
 
 export interface ChatRequest {
@@ -46,6 +56,7 @@ export interface ChatRequest {
   user_email: string;
   message: string;
   session_id?: string;
+  new_thread?: boolean;
 }
 
 export interface ChatResponse {
@@ -162,6 +173,33 @@ export const getChatSession = async (sessionId: string) => {
 
   if (!response.ok) {
     throw new Error('Failed to get chat session');
+  }
+
+  return response.json() as Promise<ChatSession>;
+};
+
+// Thread API
+export const listUserThreads = async (userEmail: string, flowId?: string) => {
+  const url = flowId 
+    ? `${API_URL}/api/v1/chat/threads?user_email=${encodeURIComponent(userEmail)}&flow_id=${encodeURIComponent(flowId)}`
+    : `${API_URL}/api/v1/chat/threads?user_email=${encodeURIComponent(userEmail)}`;
+  
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error('Failed to list threads');
+  }
+
+  return response.json() as Promise<ThreadInfo[]>;
+};
+
+export const updateThreadTitle = async (sessionId: string, title: string) => {
+  const response = await fetch(`${API_URL}/api/v1/chat/session/${sessionId}/title?title=${encodeURIComponent(title)}`, {
+    method: 'PUT',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update thread title');
   }
 
   return response.json() as Promise<ChatSession>;
