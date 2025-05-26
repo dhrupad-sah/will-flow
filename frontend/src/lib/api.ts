@@ -65,6 +65,47 @@ export interface ChatResponse {
   messages: Message[];
 }
 
+// New interfaces for Knowledge Base
+export interface DocumentInfo {
+  doc_id: string;
+  file_name: string;
+  file_type: string;
+  status: string;
+  upload_time: string;
+  size_bytes: number;
+}
+
+export interface KnowledgeBase {
+  id: string;
+  name: string;
+  description?: string;
+  user_email: string;
+  created_at: string;
+  updated_at: string;
+  documents: DocumentInfo[];
+}
+
+export interface KnowledgeBaseCreate {
+  name: string;
+  description?: string;
+}
+
+export interface KnowledgeBaseUpdate {
+  name?: string;
+  description?: string;
+}
+
+export interface ChatWithKbResponse {
+  answer: string;
+  citations: Array<{
+    doc_id: string;
+    text: string;
+    score: number;
+    file_name: string;
+    page_number?: number;
+  }>;
+}
+
 // User API
 export const createUser = async (email: string) => {
   const response = await fetch(`${API_URL}/api/v1/users/`, {
@@ -215,6 +256,122 @@ export const deleteThread = async (sessionId: string) => {
   }
 
   return response.json();
+};
+
+// Knowledge Base API
+export const createKnowledgeBase = async (kb: KnowledgeBaseCreate, userEmail: string) => {
+  const url = `${API_URL}/api/v1/knowledge-bases?user_email=${encodeURIComponent(userEmail)}`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(kb),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create knowledge base');
+  }
+
+  return response.json() as Promise<KnowledgeBase>;
+};
+
+export const listKnowledgeBases = async (userEmail: string) => {
+  const url = `${API_URL}/api/v1/knowledge-bases?user_email=${encodeURIComponent(userEmail)}`;
+  
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error('Failed to list knowledge bases');
+  }
+
+  return response.json() as Promise<KnowledgeBase[]>;
+};
+
+export const getKnowledgeBase = async (kbId: string) => {
+  const response = await fetch(`${API_URL}/api/v1/knowledge-bases/${kbId}`);
+
+  if (!response.ok) {
+    throw new Error('Failed to get knowledge base');
+  }
+
+  return response.json() as Promise<KnowledgeBase>;
+};
+
+export const updateKnowledgeBase = async (kbId: string, update: KnowledgeBaseUpdate) => {
+  const response = await fetch(`${API_URL}/api/v1/knowledge-bases/${kbId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(update),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update knowledge base');
+  }
+
+  return response.json() as Promise<KnowledgeBase>;
+};
+
+export const deleteKnowledgeBase = async (kbId: string) => {
+  const response = await fetch(`${API_URL}/api/v1/knowledge-bases/${kbId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete knowledge base');
+  }
+
+  return response.json();
+};
+
+export const uploadDocument = async (kbId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_URL}/api/v1/knowledge-bases/${kbId}/documents`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload document');
+  }
+
+  return response.json() as Promise<DocumentInfo>;
+};
+
+export const getDocumentStatus = async (kbId: string, docId: string) => {
+  const response = await fetch(`${API_URL}/api/v1/knowledge-bases/${kbId}/documents/${docId}`);
+
+  if (!response.ok) {
+    throw new Error('Failed to get document status');
+  }
+
+  return response.json() as Promise<DocumentInfo>;
+};
+
+export const chatWithKnowledgeBase = async (kbId: string, query: string, userEmail: string, sessionId?: string) => {
+  const formData = new FormData();
+  formData.append('query', query);
+  formData.append('user_email', userEmail);
+  
+  if (sessionId) {
+    formData.append('session_id', sessionId);
+  }
+
+  const response = await fetch(`${API_URL}/api/v1/knowledge-bases/${kbId}/chat`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to chat with knowledge base');
+  }
+
+  return response.json() as Promise<ChatWithKbResponse>;
 };
 
 // OpenRouter Models

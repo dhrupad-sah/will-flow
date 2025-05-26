@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from 'react';
+
 /**
  * Simple client-side auth utility for handling email-based authentication
  */
@@ -21,4 +23,29 @@ export const clearUserEmail = (): void => {
 
 export const isAuthenticated = (): boolean => {
   return !!getUserEmail();
+};
+
+export const useAuth = () => {
+  const [userEmail, setUserEmailState] = useState<string | null>(null);
+  
+  useEffect(() => {
+    setUserEmailState(getUserEmail());
+  }, []);
+  
+  const login = (email: string) => {
+    setUserEmail(email);
+    setUserEmailState(email);
+  };
+  
+  const logout = () => {
+    clearUserEmail();
+    setUserEmailState(null);
+  };
+  
+  return {
+    userEmail,
+    isAuthenticated: !!userEmail,
+    login,
+    logout
+  };
 }; 

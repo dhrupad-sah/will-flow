@@ -43,6 +43,9 @@ export default function RootLayout({
                     <Link href="/chat" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
                       Chat
                     </Link>
+                    <Link href="/knowledge-bases" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                      Knowledge Bases
+                    </Link>
                   </nav>
                 </div>
               </div>

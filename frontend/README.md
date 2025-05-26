@@ -16,8 +16,8 @@ Next.js frontend for the Will Flow platform.
 
 3. Start the development server:
    ```
-   npm run dev
-   ```
+npm run dev
+```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
